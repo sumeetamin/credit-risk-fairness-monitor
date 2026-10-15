@@ -59,6 +59,6 @@ def main():
     metrics["group_audit"]=audit
     (out/"metrics.json").write_text(json.dumps(metrics,indent=2))
     pd.DataFrame({"actual":labels.inverse_transform(yte),"probability_positive":prob,"predicted":np.where(pred==1,pos,labels.classes_[1-pos_id])}).to_csv(out/"holdout_predictions.csv",index=False)
-    joblib.dump({"pipeline":model,"classes":labels.classes_.tolist(),"positive_label":pos,"threshold":a.threshold},out/"model.joblib")
+    joblib.dump({"pipeline":model,"classes":labels.classes_.tolist(),"positive_label":pos,"threshold":a.threshold,"features":X.columns.tolist()},out/"model.joblib")
     print(json.dumps(metrics,indent=2))
 if __name__=="__main__": main()
