@@ -1,6 +1,6 @@
 # Credit Risk Fairness Monitor
 
-A reproducible credit-default classifier with calibrated probabilities, threshold trade-offs, subgroup error auditing, and a saved model artifact.
+A reproducible credit-default classifier with probability scoring, threshold trade-offs, subgroup error auditing, and a saved model artifact.
 
 > **Portfolio prototype.** Code is provided; no benchmark results are claimed until you run it on the cited data and record the output.
 
@@ -21,7 +21,11 @@ python -m venv .venv
 pip install -r requirements.txt
 # Download/prepare the source data locally, then run:
 python main.py --input data/credit.csv --target default.payment.next.month --positive-label 1 --group SEX --out outputs
+# Score a new CSV with the saved bundle:
+python predict.py --model outputs/model.joblib --input data/new_applications.csv --out outputs/scored.csv
 ```
+
+See MODEL_CARD.md for intended use, evaluation boundaries, and known limitations.
 
 ## Outputs
 
