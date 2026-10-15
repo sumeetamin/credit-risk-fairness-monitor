@@ -10,7 +10,7 @@ A reproducible credit-default classifier with probability scoring, threshold tra
 
 ## Data and provenance
 
-[UCI Default of Credit Card Clients](https://archive.ics.uci.edu/dataset/350/default+of+credit+card+clients). A CSV with predictors plus a binary outcome (for example `default.payment.next.month`). Choose a protected/monitoring column such as `SEX` or `AGE` with `--group`. Dataset files are not bundled. Respect the source terms and cite the dataset when publishing results.
+[UCI Default of Credit Card Clients](https://archive.ics.uci.edu/dataset/350/defaultofcreditcardclients), Yeh (2009), DOI [10.24432/C55S3H](https://doi.org/10.24432/C55S3H), CC BY 4.0. A CSV with predictors plus a binary outcome (for example `default.payment.next.month`). Choose a protected/monitoring column such as `SEX` or `AGE` with `--group`. Dataset files are not bundled. Respect the source terms and cite the dataset when publishing results.
 
 ## Quick start
 
