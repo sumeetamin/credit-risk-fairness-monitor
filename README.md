@@ -6,7 +6,7 @@ A reproducible credit-default classifier with probability scoring, threshold tra
 
 ## Use case
 
-A reproducible credit-default classifier with calibrated probabilities, threshold trade-offs, subgroup error auditing, and a saved model artifact. The command below reads a local data export, applies a transparent baseline, writes holdout or decision-support outputs, and saves the fitted model where applicable.
+A reproducible credit-default classifier with probability scoring, threshold trade-offs, subgroup error auditing, and a saved model artifact. The command below reads a local data export, applies a transparent baseline, writes holdout or decision-support outputs, and saves the fitted model where applicable.
 
 ## Data and provenance
 
