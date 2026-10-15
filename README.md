@@ -35,4 +35,4 @@ For a production review, preserve a time-based, untouched holdout; compare again
 
 ## License
 
-Code: MIT. Third-party datasets remain subject to their original terms.
+No code license file is included yet. Third-party datasets remain subject to their original terms.
