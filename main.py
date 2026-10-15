@@ -18,6 +18,7 @@ def main():
     p.add_argument("--input",required=True); p.add_argument("--target",required=True)
     p.add_argument("--group",default=None,help="Optional sensitive or operational group for error-rate audit")
     p.add_argument("--positive-label",default=None); p.add_argument("--threshold",type=float,default=0.5)
+    p.add_argument("--false-positive-cost",type=float,default=1.0); p.add_argument("--false-negative-cost",type=float,default=5.0)
     p.add_argument("--out",default="outputs"); a=p.parse_args()
     df=pd.read_csv(a.input)
     if a.target not in df: raise SystemExit(f"Missing target column: {a.target}")
@@ -57,6 +58,15 @@ def main():
             audit.append({"group":val,"n":int(m.sum()),"positive_rate":float(guess.mean()),"tpr":tpr,"fpr":fpr})
     out=Path(a.out); out.mkdir(parents=True,exist_ok=True)
     metrics["group_audit"]=audit
+    sweep=[]
+    for threshold in np.linspace(.05,.95,19):
+        decision=prob>=threshold
+        fp_n=int(((decision==1)&(truth==0)).sum()); fn_n=int(((decision==0)&(truth==1)).sum())
+        sweep.append({"threshold":float(threshold),"precision":float(((decision==1)&(truth==1)).sum()/max(1,decision.sum())),
+                      "recall":float(((decision==1)&(truth==1)).sum()/max(1,truth.sum())),
+                      "false_positives":fp_n,"false_negatives":fn_n,
+                      "weighted_error_cost":float(fp_n*a.false_positive_cost+fn_n*a.false_negative_cost)})
+    pd.DataFrame(sweep).to_csv(out/"threshold_tradeoffs.csv",index=False)
     (out/"metrics.json").write_text(json.dumps(metrics,indent=2))
     pd.DataFrame({"actual":labels.inverse_transform(yte),"probability_positive":prob,"predicted":np.where(pred==1,pos,labels.classes_[1-pos_id])}).to_csv(out/"holdout_predictions.csv",index=False)
     joblib.dump({"pipeline":model,"classes":labels.classes_.tolist(),"positive_label":pos,"threshold":a.threshold,"features":X.columns.tolist()},out/"model.joblib")
