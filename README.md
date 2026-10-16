@@ -28,7 +28,7 @@ Requires Python 3.10 or newer. Install dependencies, download the cited UCI work
 
 ```bash
 python -m venv .venv
-# Windows: .venv\\Scripts\\activate
+# Windows: .venv\Scripts\activate
 # macOS/Linux: source .venv/bin/activate
 python -m pip install -r requirements.txt
 python prepare_data.py
