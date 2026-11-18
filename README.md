@@ -15,10 +15,12 @@ The pipeline was run on all 30,000 records of UCI's [Default of Credit Card Clie
 | Brier score | 0.209 |
 | Train-prevalence constant Brier baseline | 0.172 |
 | Brier skill vs. train-prevalence baseline | −0.211 |
+| Log loss | 0.607 |
+| Train-prevalence constant log loss | 0.528 |
 | Balanced accuracy at 0.50 | 0.660 |
 | Confusion counts (TN / FP / FN / TP) | 4,036 / 1,805 / 616 / 1,043 |
 
-The model's Brier score is worse than the constant probability fitted to training prevalence, indicating weak probability quality on this split. No calibrator or separate calibration set is supplied. At the 0.50 threshold, the `SEX=1` and `SEX=2` groups had TPRs of 0.638 and 0.622, and FPRs of 0.337 and 0.291. These are descriptive differences from one random split without uncertainty intervals or adjustment; they are not proof of fairness or unfairness. The data's historical Taiwan credit-card population and its coded attributes have important limitations.
+The probability baselines are computed in code from the training split only. The model's Brier score and log loss are both worse than the training-prevalence constant on this split, indicating weak probability quality. No calibrator or separate calibration set is supplied. At the 0.50 threshold, the `SEX=1` and `SEX=2` groups had TPRs of 0.638 and 0.622, and FPRs of 0.337 and 0.291. These are descriptive differences from one random split without uncertainty intervals or adjustment; they are not proof of fairness or unfairness. The data's historical Taiwan credit-card population and its coded attributes have important limitations.
 
 The source archive SHA-256 for this run is `56c885f84457f6680f8438f02bfcdac9579323d8a94465ee5f26e32baa727602`. The metrics also record the prepared CSV fingerprint and software versions. No raw dataset, row-level predictions, or fitted model are published.
 
