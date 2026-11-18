@@ -234,7 +234,7 @@ def main() -> None:
     (output / "metrics.json").write_text(json.dumps(metrics, indent=2), encoding="utf-8")
     pd.DataFrame(
         {
-            "actual": labels.inverse_transform(test_y),
+            "actual": np.where(test_y == 1, positive_label, labels.classes_[1 - positive_class]),
             "probability_positive": probabilities,
             "predicted": np.where(predictions == 1, positive_label, labels.classes_[1 - positive_class]),
         }
