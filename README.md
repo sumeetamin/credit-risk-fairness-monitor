@@ -59,3 +59,6 @@ Yeh, I. (2009). [Default of Credit Card Clients](https://archive.ics.uci.edu/dat
 
 See [MODEL_CARD.md](MODEL_CARD.md) for intended-use and risk details.
 
+
+
+Probability quality: the model Brier score is 0.20868 on the published holdout versus 0.17227 for the constant training-prevalence baseline (Brier skill −0.211). This indicates poor probability quality on this split; no calibrator or separate calibration set is supplied. See `results/benchmark.json`.
