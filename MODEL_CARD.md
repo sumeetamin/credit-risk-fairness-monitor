@@ -2,7 +2,7 @@
 
 ## Summary
 
-A class-weighted logistic-regression baseline estimates the probability of the positive default label. The workflow prepares the cited UCI dataset, retains a stratified random holdout, records aggregate metrics and threshold trade-offs, audits optional groups, and saves a local model bundle.
+A logistic-regression baseline estimates the probability of the positive default label. A validation slice selects unweighted versus class-weighted training by Brier score; the selected model is refit on the full training partition. The workflow prepares the cited UCI dataset, retains a stratified random holdout, records aggregate metrics and threshold trade-offs, audits optional groups, and saves a local model bundle.
 
 ## Intended use
 
@@ -18,9 +18,9 @@ The benchmark uses UCI's Default of Credit Card Clients dataset (30,000 historic
 
 ## Method and results
 
-Numeric fields are median-imputed and standardized; categorical fields are mode-imputed and one-hot encoded. Logistic regression uses class weighting. ID and the optional audit group are excluded from model inputs. The reported evaluation uses a stratified random 75%/25% train/holdout split with seed 42 and a user-selected threshold of 0.50.
+Numeric fields are median-imputed and standardized; categorical fields are mode-imputed and one-hot encoded. ID and the optional audit group are excluded from model inputs. The reported evaluation uses a stratified random 75%/25% train/holdout split with seed 42; 20% of the training partition is reserved for model selection. The user-selected decision threshold defaults to 0.50.
 
-On the recorded run, holdout ROC-AUC was 0.715, average precision 0.499, Brier score 0.209, log loss 0.607, and balanced accuracy 0.660. A constant probability fitted from training prevalence scored Brier 0.172 and log loss 0.528 on this holdout; the model is worse on both probability metrics. For `SEX=1` and `SEX=2`, holdout TPR was 0.638 and 0.622; FPR was 0.337 and 0.291. These are descriptive results from one split and one historical dataset. Brier score alone does not establish calibration; group rates without uncertainty intervals do not establish fairness.
+On the recorded run, validation selected unweighted logistic regression (validation Brier 0.144 vs. 0.207 for class-weighted). Holdout ROC-AUC was 0.714, average precision 0.502, Brier score 0.146, log loss 0.468, and balanced accuracy 0.607. The train-prevalence constant baseline had Brier 0.172 and log loss 0.528. For `SEX=1` and `SEX=2`, holdout TPR was 0.244 and 0.243; FPR was 0.035 and 0.026. These are descriptive results from one split and one historical dataset. The Brier comparison does not establish calibration; group rates without uncertainty intervals do not establish fairness.
 
 ## Risks and limitations
 
