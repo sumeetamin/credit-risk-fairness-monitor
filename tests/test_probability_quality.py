@@ -2,7 +2,7 @@ import unittest
 
 import numpy as np
 
-from main import probability_quality_metrics
+from main import probability_quality_metrics, select_weighting_by_validation
 
 
 class ProbabilityQualityTests(unittest.TestCase):
@@ -23,6 +23,15 @@ class ProbabilityQualityTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             probability_quality_metrics([0, 1], [0, 1], [0.2, float("nan")])
 
+    def test_weighting_is_selected_from_validation_brier_scores(self):
+        self.assertEqual(
+            select_weighting_by_validation({"balanced": 0.207, "unweighted": 0.144}),
+            "unweighted",
+        )
+        with self.assertRaises(ValueError):
+            select_weighting_by_validation({"balanced": float("nan")})
+
 
 if __name__ == "__main__":
     unittest.main()
+
