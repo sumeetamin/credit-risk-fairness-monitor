@@ -19,7 +19,7 @@ The pipeline was run on all 30,000 records of UCI's [Default of Credit Card Clie
 | Balanced accuracy at 0.50 | 0.607 |
 | Confusion counts (TN / FP / FN / TP) | 5,669 / 172 / 1,255 / 404 |
 
-At the 0.50 threshold, the `SEX=1` and `SEX=2` groups had TPRs of 0.244 and 0.243, and FPRs of 0.035 and 0.026. These are descriptive differences from one random split without uncertainty intervals or adjustment; they are not proof of fairness or unfairness. Removing class weighting substantially improves probability error against the train-fitted prevalence baseline, while changing the 0.50 decision trade-off. The data's historical Taiwan credit-card population and its coded attributes have important limitations.
+At the 0.50 threshold, `SEX=1` had TPR 0.244 (95% Wilson interval 0.213–0.277) and FPR 0.035 (0.028–0.043); `SEX=2` had TPR 0.243 (0.217–0.272) and FPR 0.026 (0.021–0.032). These intervals describe binomial uncertainty on one random holdout; there is no multiple-comparison adjustment, and they are not proof of fairness or unfairness. Removing class weighting substantially improves probability error against the train-fitted prevalence baseline, while changing the 0.50 decision trade-off. The data's historical Taiwan credit-card population and its coded attributes have important limitations.
 
 The source archive SHA-256 for this run is `56c885f84457f6680f8438f02bfcdac9579323d8a94465ee5f26e32baa727602`. The metrics also record the prepared CSV fingerprint and software versions. No raw dataset, row-level predictions, or fitted model are published.
 
@@ -57,7 +57,7 @@ Yeh, I. (2009). [Default of Credit Card Clients](https://archive.ics.uci.edu/dat
 - The holdout is stratified and random because the source data does not provide a suitable application-time field for a temporal split. Results do not measure performance on later customers or another population.
 - The Brier/log-loss comparison is a single-split probability-quality check, not a calibration study. No confidence intervals, repeated-split estimate, or external validation is included.
 - Threshold costs are user-supplied assumptions, not measured lender costs. The threshold sweep is not a lending policy.
-- Group error rates are descriptive. They do not establish fairness, protected-class compliance, causality, or acceptable treatment.
+- Group error rates and Wilson intervals are descriptive. They do not establish fairness, protected-class compliance, causality, or acceptable treatment.
 - Predictions require human review and should not be used for eligibility, pricing, credit limits, collections, or other consequential decisions.
 
 See [MODEL_CARD.md](MODEL_CARD.md) for intended-use and risk details.
