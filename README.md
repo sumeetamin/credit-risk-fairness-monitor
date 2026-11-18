@@ -13,10 +13,12 @@ The pipeline was run on all 30,000 records of UCI's [Default of Credit Card Clie
 | ROC-AUC | 0.715 |
 | Average precision | 0.499 |
 | Brier score | 0.209 |
+| Train-prevalence constant Brier baseline | 0.172 |
+| Brier skill vs. train-prevalence baseline | −0.211 |
 | Balanced accuracy at 0.50 | 0.660 |
 | Confusion counts (TN / FP / FN / TP) | 4,036 / 1,805 / 616 / 1,043 |
 
-At the 0.50 threshold, the `SEX=1` and `SEX=2` groups had TPRs of 0.638 and 0.622, and FPRs of 0.337 and 0.291. These are descriptive differences from one random split without uncertainty intervals or adjustment; they are not proof of fairness or unfairness. The data's historical Taiwan credit-card population and its coded attributes have important limitations.
+The model's Brier score is worse than the constant probability fitted to training prevalence, indicating weak probability quality on this split. No calibrator or separate calibration set is supplied. At the 0.50 threshold, the `SEX=1` and `SEX=2` groups had TPRs of 0.638 and 0.622, and FPRs of 0.337 and 0.291. These are descriptive differences from one random split without uncertainty intervals or adjustment; they are not proof of fairness or unfairness. The data's historical Taiwan credit-card population and its coded attributes have important limitations.
 
 The source archive SHA-256 for this run is `56c885f84457f6680f8438f02bfcdac9579323d8a94465ee5f26e32baa727602`. The metrics also record the prepared CSV fingerprint and software versions. No raw dataset, row-level predictions, or fitted model are published.
 
@@ -60,5 +62,3 @@ Yeh, I. (2009). [Default of Credit Card Clients](https://archive.ics.uci.edu/dat
 See [MODEL_CARD.md](MODEL_CARD.md) for intended-use and risk details.
 
 
-
-Probability quality: the model Brier score is 0.20868 on the published holdout versus 0.17227 for the constant training-prevalence baseline (Brier skill −0.211). This indicates poor probability quality on this split; no calibrator or separate calibration set is supplied. See `results/benchmark.json`.
