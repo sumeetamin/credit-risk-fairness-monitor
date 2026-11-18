@@ -41,7 +41,9 @@ def sha256_file(path: Path) -> str:
     return digest.hexdigest()
 
 
-def build_pipeline(numeric: list[str], categorical: list[str]) -> Pipeline:
+def build_pipeline(
+    numeric: list[str], categorical: list[str], *, class_weight: str | None = None
+) -> Pipeline:
     preprocessing = ColumnTransformer(
         [
             (
@@ -70,7 +72,7 @@ def build_pipeline(numeric: list[str], categorical: list[str]) -> Pipeline:
     return Pipeline(
         [
             ("features", preprocessing),
-            ("classifier", LogisticRegression(max_iter=1500, class_weight="balanced")),
+            ("classifier", LogisticRegression(max_iter=1500, class_weight=class_weight)),
         ]
     )
 
@@ -87,6 +89,13 @@ def encode_positive_target(values: pd.Series, positive_label: str) -> np.ndarray
 def decode_binary_target(values: np.ndarray, positive_label: str, negative_label: str) -> np.ndarray:
     """Map the model's binary 1/0 convention back to the selected string labels."""
     return np.where(np.asarray(values) == 1, positive_label, negative_label)
+
+
+def select_weighting_by_validation(candidate_scores: dict[str, float]) -> str:
+    """Choose the candidate with the lowest validation Brier score."""
+    if not candidate_scores or any(not np.isfinite(score) for score in candidate_scores.values()):
+        raise ValueError("candidate validation Brier scores must be finite and non-empty")
+    return min(candidate_scores, key=candidate_scores.get)
 
 
 def probability_quality_metrics(
@@ -203,7 +212,27 @@ def main() -> None:
         random_state=RANDOM_SEED,
         stratify=truth_all,
     )
-    model = build_pipeline(numeric, categorical)
+    fit_x, validation_x, fit_y, validation_y = train_test_split(
+        train_x,
+        train_y,
+        test_size=0.20,
+        random_state=RANDOM_SEED + 1,
+        stratify=train_y,
+    )
+    candidate_validation = {}
+    for class_weight in (None, "balanced"):
+        candidate = build_pipeline(numeric, categorical, class_weight=class_weight)
+        candidate.fit(fit_x, fit_y)
+        validation_probabilities = candidate.predict_proba(validation_x)[:, 1]
+        candidate_validation["unweighted" if class_weight is None else "balanced"] = {
+            "brier_score": float(brier_score_loss(validation_y, validation_probabilities)),
+            "log_loss": float(log_loss(validation_y, validation_probabilities, labels=[0, 1])),
+        }
+    selected_weighting = select_weighting_by_validation(
+        {name: result["brier_score"] for name, result in candidate_validation.items()}
+    )
+    selected_class_weight = None if selected_weighting == "unweighted" else "balanced"
+    model = build_pipeline(numeric, categorical, class_weight=selected_class_weight)
     model.fit(train_x, train_y)
     probabilities = model.predict_proba(test_x)[:, 1]
     predictions = (probabilities >= args.threshold).astype(int)
@@ -228,6 +257,12 @@ def main() -> None:
         "brier_score": probability_quality["model_brier_score"],
         "log_loss": probability_quality["model_log_loss"],
         "probability_quality": probability_quality,
+        "validation_model_selection": {
+            "selection_metric": "Brier score (lower is better)",
+            "selected_weighting": selected_weighting,
+            "candidate_metrics": candidate_validation,
+            "validation_fraction_of_training_partition": 0.20,
+        },
         "balanced_accuracy": float(balanced_accuracy_score(test_y, predictions)),
         "confusion_matrix": {"tn": int(tn), "fp": int(fp), "fn": int(fn), "tp": int(tp)},
         "group_audit": subgroup_audit(groups.iloc[test_indices], test_y, predictions) if groups is not None else [],
@@ -238,7 +273,7 @@ def main() -> None:
             "source_rows_without_target": int(raw_input_rows - len(frame)),
         },
         "protocol": {
-            "split": "stratified random holdout",
+            "split": "stratified 60% fit / 15% validation / 25% final holdout; refit on train+validation",
             "test_fraction": TEST_SIZE,
             "random_seed": RANDOM_SEED,
             "features": feature_columns,
@@ -300,4 +335,5 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
 
