@@ -10,7 +10,7 @@ The pipeline was run on all 30,000 records of UCI's [Default of Credit Card Clie
 
 | Measure | Holdout result |
 |---|---:|
-| ROC-AUC | 0.715 |
+| ROC-AUC | 0.714 |
 | Average precision | 0.502 |
 | Brier score | 0.146 |
 | Log loss | 0.468 |
