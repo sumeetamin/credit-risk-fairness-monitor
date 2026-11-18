@@ -89,6 +89,33 @@ def decode_binary_target(values: np.ndarray, positive_label: str, negative_label
     return np.where(np.asarray(values) == 1, positive_label, negative_label)
 
 
+def probability_quality_metrics(
+    train_labels: np.ndarray, test_labels: np.ndarray, probabilities: np.ndarray
+) -> dict:
+    """Compare probability forecasts with a constant prior fitted on training data only."""
+    train_labels = np.asarray(train_labels, dtype=int)
+    test_labels = np.asarray(test_labels, dtype=int)
+    probabilities = np.asarray(probabilities, dtype=float)
+    if train_labels.size == 0 or test_labels.size == 0:
+        raise ValueError("training and test labels must be non-empty")
+    if probabilities.shape != test_labels.shape or not np.isfinite(probabilities).all():
+        raise ValueError("probabilities must be finite and match test labels")
+    if not set(np.unique(train_labels)).issubset({0, 1}) or not set(np.unique(test_labels)).issubset({0, 1}):
+        raise ValueError("labels must be binary 0/1")
+    prior = float(train_labels.mean())
+    constant = np.full(test_labels.shape, prior, dtype=float)
+    model_brier = float(brier_score_loss(test_labels, probabilities))
+    baseline_brier = float(brier_score_loss(test_labels, constant))
+    return {
+        "model_brier_score": model_brier,
+        "train_prevalence_constant_baseline_brier_score": baseline_brier,
+        "brier_skill_score": float(1 - model_brier / baseline_brier) if baseline_brier > 0 else None,
+        "model_log_loss": float(log_loss(test_labels, probabilities, labels=[0, 1])),
+        "train_prevalence_constant_baseline_log_loss": float(log_loss(test_labels, constant, labels=[0, 1])),
+        "training_prevalence": prior,
+    }
+
+
 def subgroup_audit(groups: pd.Series, truth: np.ndarray, predictions: np.ndarray) -> list[dict]:
     audit = []
     values = groups.fillna("UNKNOWN").astype(str).to_numpy()
@@ -182,6 +209,8 @@ def main() -> None:
     predictions = (probabilities >= args.threshold).astype(int)
     tn, fp, fn, tp = confusion_matrix(test_y, predictions, labels=[0, 1]).ravel()
 
+    probability_quality = probability_quality_metrics(train_y, test_y, probabilities)
+
     source_metadata_path = input_path.parent / "source.json"
     source_metadata = (
         json.loads(source_metadata_path.read_text(encoding="utf-8"))
@@ -196,7 +225,9 @@ def main() -> None:
         "threshold": args.threshold,
         "roc_auc": float(roc_auc_score(test_y, probabilities)),
         "average_precision": float(average_precision_score(test_y, probabilities)),
-        "brier_score": float(brier_score_loss(test_y, probabilities)),
+        "brier_score": probability_quality["model_brier_score"],
+        "log_loss": probability_quality["model_log_loss"],
+        "probability_quality": probability_quality,
         "balanced_accuracy": float(balanced_accuracy_score(test_y, predictions)),
         "confusion_matrix": {"tn": int(tn), "fp": int(fp), "fn": int(fn), "tp": int(tp)},
         "group_audit": subgroup_audit(groups.iloc[test_indices], test_y, predictions) if groups is not None else [],
@@ -250,7 +281,7 @@ def main() -> None:
         {
             "actual": decode_binary_target(test_y, positive_label, negative_label),
             "probability_positive": probabilities,
-            "predicted": np.where(predictions == 1, positive_label, labels.classes_[1 - positive_class]),
+            "predicted": decode_binary_target(predictions, positive_label, negative_label),
         }
     ).to_csv(output / "holdout_predictions.csv", index=False)
     joblib.dump(
