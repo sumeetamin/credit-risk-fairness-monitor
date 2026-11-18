@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import math
 import platform
 from pathlib import Path
 
@@ -98,6 +99,20 @@ def select_weighting_by_validation(candidate_scores: dict[str, float]) -> str:
     return min(candidate_scores, key=candidate_scores.get)
 
 
+def wilson_interval(successes: int, trials: int, z: float = 1.959963984540054) -> list[float] | None:
+    """Return a two-sided Wilson score interval for a binomial proportion."""
+    if trials < 0 or successes < 0 or successes > trials or z <= 0:
+        raise ValueError("Wilson interval requires 0 <= successes <= trials and z > 0")
+    if trials == 0:
+        return None
+    proportion = successes / trials
+    z2 = z * z
+    denominator = 1 + z2 / trials
+    center = (proportion + z2 / (2 * trials)) / denominator
+    margin = z * math.sqrt(proportion * (1 - proportion) / trials + z2 / (4 * trials * trials)) / denominator
+    return [float(max(0.0, center - margin)), float(min(1.0, center + margin))]
+
+
 def probability_quality_metrics(
     train_labels: np.ndarray, test_labels: np.ndarray, probabilities: np.ndarray
 ) -> dict:
@@ -147,6 +162,8 @@ def subgroup_audit(groups: pd.Series, truth: np.ndarray, predictions: np.ndarray
                 "selection_rate": float(predicted.mean()),
                 "tpr": float(tp / positives) if positives else None,
                 "fpr": float(fp / negatives) if negatives else None,
+                "tpr_wilson_95_ci": wilson_interval(tp, positives),
+                "fpr_wilson_95_ci": wilson_interval(fp, negatives),
             }
         )
     return audit
@@ -335,5 +352,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
 
