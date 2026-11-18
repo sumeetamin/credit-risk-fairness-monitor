@@ -7,6 +7,15 @@
   "roc_auc": 0.7148044332125003,
   "average_precision": 0.499298712482766,
   "brier_score": 0.2086798873977341,
+  "log_loss": 0.6070612301143747,
+  "probability_quality": {
+    "model_brier_score": 0.2086798873977341,
+    "train_prevalence_constant_baseline_brier_score": 0.17227056,
+    "brier_skill_score": -0.2113496780746178,
+    "model_log_loss": 0.6070612301143747,
+    "train_prevalence_constant_baseline_log_loss": 0.5284225707356826,
+    "training_prevalence": 0.2212
+  },
   "balanced_accuracy": 0.6598347777279336,
   "confusion_matrix": {
     "tn": 4036,
@@ -72,18 +81,11 @@
       "ID"
     ],
     "threshold_costs": {
-      "false_positive": 1,
-      "false_negative": 5
+      "false_positive": 1.0,
+      "false_negative": 5.0
     },
     "python": "3.14.3",
     "pandas": "3.0.2",
     "scikit_learn": "1.8.0"
-  },
-  "train_prevalence_constant_baseline": {
-    "training_prevalence": 0.2212,
-    "test_brier_score": 0.17227056,
-    "model_brier_score": 0.2086798873977341,
-    "brier_skill_score": -0.2113496780746178,
-    "interpretation": "Negative Brier skill means model probability error exceeds a constant probability fitted from training prevalence. This is a diagnostic baseline, not a calibrated model."
   }
 }
