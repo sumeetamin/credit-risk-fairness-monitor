@@ -74,6 +74,15 @@ def build_pipeline(numeric: list[str], categorical: list[str]) -> Pipeline:
     )
 
 
+def encode_positive_target(values: pd.Series, positive_label: str) -> np.ndarray:
+    """Map the configured positive label to 1 regardless of lexical class order."""
+    labels = values.astype(str)
+    observed = set(labels.unique())
+    if len(observed) != 2 or positive_label not in observed:
+        raise ValueError("positive_label must identify one of exactly two observed classes")
+    return (labels.to_numpy() == positive_label).astype(int)
+
+
 def subgroup_audit(groups: pd.Series, truth: np.ndarray, predictions: np.ndarray) -> list[dict]:
     audit = []
     values = groups.fillna("UNKNOWN").astype(str).to_numpy()
@@ -140,8 +149,7 @@ def main() -> None:
     positive_label = str(args.positive_label) if args.positive_label is not None else str(labels.classes_[-1])
     if positive_label not in labels.classes_:
         parser.error(f"positive label must be one of {labels.classes_.tolist()}")
-    positive_class = int(np.where(labels.classes_ == positive_label)[0][0])
-    truth_all = (encoded_target == positive_class).astype(int)
+    truth_all = encode_positive_target(frame[args.target], positive_label)
 
     excluded = {args.target}
     if args.group:
@@ -244,6 +252,7 @@ def main() -> None:
             "pipeline": model,
             "classes": labels.classes_.tolist(),
             "positive_label": positive_label,
+            "positive_model_class": 1,
             "threshold": args.threshold,
             "features": feature_columns,
         },
