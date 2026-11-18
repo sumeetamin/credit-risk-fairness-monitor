@@ -84,6 +84,11 @@ def encode_positive_target(values: pd.Series, positive_label: str) -> np.ndarray
     return (labels.to_numpy() == positive_label).astype(int)
 
 
+def decode_binary_target(values: np.ndarray, positive_label: str, negative_label: str) -> np.ndarray:
+    """Map the model's binary 1/0 convention back to the selected string labels."""
+    return np.where(np.asarray(values) == 1, positive_label, negative_label)
+
+
 def subgroup_audit(groups: pd.Series, truth: np.ndarray, predictions: np.ndarray) -> list[dict]:
     audit = []
     values = groups.fillna("UNKNOWN").astype(str).to_numpy()
@@ -243,7 +248,7 @@ def main() -> None:
     (output / "metrics.json").write_text(json.dumps(metrics, indent=2), encoding="utf-8")
     pd.DataFrame(
         {
-            "actual": np.where(test_y == 1, positive_label, negative_label),
+            "actual": decode_binary_target(test_y, positive_label, negative_label),
             "probability_positive": probabilities,
             "predicted": np.where(predictions == 1, positive_label, labels.classes_[1 - positive_class]),
         }
