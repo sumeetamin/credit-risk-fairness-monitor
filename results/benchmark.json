@@ -72,11 +72,18 @@
       "ID"
     ],
     "threshold_costs": {
-      "false_positive": 1.0,
-      "false_negative": 5.0
+      "false_positive": 1,
+      "false_negative": 5
     },
     "python": "3.14.3",
     "pandas": "3.0.2",
     "scikit_learn": "1.8.0"
+  },
+  "train_prevalence_constant_baseline": {
+    "training_prevalence": 0.2212,
+    "test_brier_score": 0.17227056,
+    "model_brier_score": 0.2086798873977341,
+    "brier_skill_score": -0.2113496780746178,
+    "interpretation": "Negative Brier skill means model probability error exceeds a constant probability fitted from training prevalence. This is a diagnostic baseline, not a calibrated model."
   }
 }
