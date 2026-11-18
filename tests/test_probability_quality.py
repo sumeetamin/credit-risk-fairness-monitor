@@ -2,7 +2,7 @@ import unittest
 
 import numpy as np
 
-from main import probability_quality_metrics, select_weighting_by_validation
+from main import probability_quality_metrics, select_weighting_by_validation, wilson_interval
 
 
 class ProbabilityQualityTests(unittest.TestCase):
@@ -30,6 +30,14 @@ class ProbabilityQualityTests(unittest.TestCase):
         )
         with self.assertRaises(ValueError):
             select_weighting_by_validation({"balanced": float("nan")})
+
+    def test_wilson_intervals_are_bounded_and_handle_zero_support(self):
+        interval = wilson_interval(5, 10)
+        self.assertLess(interval[0], 0.5)
+        self.assertGreater(interval[1], 0.5)
+        self.assertEqual(wilson_interval(0, 0), None)
+        self.assertEqual(wilson_interval(0, 10)[0], 0.0)
+        self.assertAlmostEqual(wilson_interval(10, 10)[1], 1.0)
 
 
 if __name__ == "__main__":
