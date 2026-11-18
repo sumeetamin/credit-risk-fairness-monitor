@@ -34,3 +34,11 @@ def test_prediction_rejects_missing_positive_model_class():
         classes_ = np.array([0, 2])
     with pytest.raises(ValueError, match="expected positive class"):
         positive_probability({"pipeline": InvalidModel()}, pd.DataFrame({"x": [1]}))
+
+def test_holdout_labels_decode_with_configured_positive_label():
+    classes = ["default", "paid"]
+    positive_label = "default"
+    negative_label = next(label for label in classes if label != positive_label)
+    binary_actual = np.array([1, 0, 1])
+    decoded = np.where(binary_actual == 1, positive_label, negative_label)
+    assert decoded.tolist() == ["default", "paid", "default"]
