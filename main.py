@@ -19,6 +19,7 @@ from sklearn.metrics import (
     average_precision_score,
     balanced_accuracy_score,
     brier_score_loss,
+    log_loss,
     confusion_matrix,
     roc_auc_score,
 )
@@ -143,12 +144,12 @@ def main() -> None:
 
     groups = frame[args.group].reset_index(drop=True) if args.group else None
     labels = LabelEncoder().fit(frame[args.target].astype(str))
-    encoded_target = labels.transform(frame[args.target].astype(str))
     if len(labels.classes_) != 2:
         parser.error("this baseline expects exactly two target classes")
     positive_label = str(args.positive_label) if args.positive_label is not None else str(labels.classes_[-1])
     if positive_label not in labels.classes_:
         parser.error(f"positive label must be one of {labels.classes_.tolist()}")
+    negative_label = str(next(label for label in labels.classes_ if label != positive_label))
     truth_all = encode_positive_target(frame[args.target], positive_label)
 
     excluded = {args.target}
@@ -242,7 +243,7 @@ def main() -> None:
     (output / "metrics.json").write_text(json.dumps(metrics, indent=2), encoding="utf-8")
     pd.DataFrame(
         {
-            "actual": np.where(test_y == 1, positive_label, labels.classes_[1 - positive_class]),
+            "actual": np.where(test_y == 1, positive_label, negative_label),
             "probability_positive": probabilities,
             "predicted": np.where(predictions == 1, positive_label, labels.classes_[1 - positive_class]),
         }
