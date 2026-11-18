@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from main import encode_positive_target
+from main import decode_binary_target, encode_positive_target
 from predict import positive_probability
 
 
@@ -40,5 +40,5 @@ def test_holdout_labels_decode_with_configured_positive_label():
     positive_label = "default"
     negative_label = next(label for label in classes if label != positive_label)
     binary_actual = np.array([1, 0, 1])
-    decoded = np.where(binary_actual == 1, positive_label, negative_label)
+    decoded = decode_binary_target(binary_actual, positive_label, negative_label)
     assert decoded.tolist() == ["default", "paid", "default"]
