@@ -20,7 +20,7 @@ The benchmark uses UCI's Default of Credit Card Clients dataset (30,000 historic
 
 Numeric fields are median-imputed and standardized; categorical fields are mode-imputed and one-hot encoded. Logistic regression uses class weighting. ID and the optional audit group are excluded from model inputs. The reported evaluation uses a stratified random 75%/25% train/holdout split with seed 42 and a user-selected threshold of 0.50.
 
-On the recorded run, holdout ROC-AUC was 0.715, average precision 0.499, Brier score 0.209, and balanced accuracy 0.660. For `SEX=1` and `SEX=2`, holdout TPR was 0.638 and 0.622; FPR was 0.337 and 0.291. These are descriptive results from one split and one historical dataset. Brier score alone does not establish calibration; group rates without uncertainty intervals do not establish fairness.
+On the recorded run, holdout ROC-AUC was 0.715, average precision 0.499, Brier score 0.209, log loss 0.607, and balanced accuracy 0.660. A constant probability fitted from training prevalence scored Brier 0.172 and log loss 0.528 on this holdout; the model is worse on both probability metrics. For `SEX=1` and `SEX=2`, holdout TPR was 0.638 and 0.622; FPR was 0.337 and 0.291. These are descriptive results from one split and one historical dataset. Brier score alone does not establish calibration; group rates without uncertainty intervals do not establish fairness.
 
 ## Risks and limitations
 
