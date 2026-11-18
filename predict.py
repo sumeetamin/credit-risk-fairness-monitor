@@ -7,8 +7,9 @@ def main():
  bundle=joblib.load(a.model);df=pd.read_csv(a.input);features=bundle["features"]
  missing=[c for c in features if c not in df]
  if missing:raise SystemExit(f"Scoring file is missing training features: {missing}")
- labels=np.asarray(bundle["classes"]);pos=bundle["positive_label"];pos_id=int(np.where(labels==pos)[0][0])
- prob=bundle["pipeline"].predict_proba(df[features])[:,pos_id];threshold=float(bundle["threshold"])
+ labels=np.asarray(bundle["classes"]);pos=bundle["positive_label"]
+ # main.py remaps the selected positive label to binary class 1 before fitting.
+ prob=bundle["pipeline"].predict_proba(df[features])[:,1];threshold=float(bundle["threshold"])
  keep=[c for c in ["application_id","customer_id","id"] if c in df]
  out=pd.DataFrame({c:df[c] for c in keep});out["default_probability"]=prob;out["review_flag"]=prob>=threshold
  path=Path(a.out);path.parent.mkdir(parents=True,exist_ok=True);out.to_csv(path,index=False)
